@@ -35,14 +35,38 @@
   </div>
 
   <script>
-    function submitForm() {
-      const server = document.getElementById('server').value;
-      const role = document.getElementById('role').value;
-      const train = document.getElementById('train').value;
+  async function submitForm() {
+    const server = document.getElementById('server').value;
+    const role = document.getElementById('role').value;
+    const train = document.getElementById('train').value;
 
-      document.getElementById('response').innerText = 
-        `✅ Výkaz odeslán!\nServer: ${server}\nRole: ${role}\nVlak: ${train}`;
+    const responseElement = document.getElementById('response');
+    responseElement.innerText = 'Odesílám výkaz a posílám na Discord...'; // Zobrazí zprávu o odesílání
+
+    try {
+      // Odeslání dat na Vercel Function (URL je /api/submit-report)
+      const apiResponse = await fetch('/api/submit-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ server, role, train }),
+      });
+
+      const data = await apiResponse.json(); // Přečte odpověď z Vercel Function
+
+      if (apiResponse.ok) { // Kontrola, zda byla odpověď úspěšná (status 2xx)
+        responseElement.innerText = `✅ ${data.message}\nServer: ${server}\nRole: ${role}\nVlak: ${train}`;
+      } else {
+        // Zpracování chybové odpovědi z Vercel Function
+        responseElement.innerText = `Chyba při odesílání: ${data.message || apiResponse.statusText}`;
+      }
+    } catch (error) {
+      // Zpracování síťových chyb (např. server není dostupný)
+      responseElement.innerText = `Nepodařilo se připojit k serveru: ${error.message}`;
+      console.error("Fetch error:", error);
     }
-  </script>
+  }
+</script>
 </body>
 </html>
