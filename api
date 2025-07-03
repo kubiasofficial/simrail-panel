@@ -1,4 +1,3 @@
-api/submit-report.js
 // api/submit-report.js
 export default async function handler(request, response) {
   // Ověření, že se jedná o POST požadavek
